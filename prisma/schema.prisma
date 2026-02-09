@@ -1,0 +1,222 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// ─── Users ───────────────────────────────────────────────────────
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String?
+  passwordHash String
+  createdAt    DateTime @default(now())
+
+  games        Game[]        @relation("UserGames")
+  authSessions AuthSession[]
+
+  @@index([createdAt])
+}
+
+model AuthSession {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  token     String   @unique
+  expiresAt DateTime
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([token])
+  @@index([expiresAt])
+}
+
+// ─── Games ───────────────────────────────────────────────────────
+
+model Game {
+  id      String @id @default(cuid())
+  ownerId String?
+  owner   User?  @relation("UserGames", fields: [ownerId], references: [id])
+
+  title       String
+  description String?
+
+  // SQLite doesn't support enums. Valid values: "PRIVATE", "UNLISTED", "PUBLIC"
+  visibility String @default("PRIVATE")
+
+  // Valid values: "USER", "OFFICIAL"
+  sourceType      String  @default("USER")
+  officialVersion Int?
+  slug            String? @unique // stable identifier for official game seeding
+
+  sourceGameId String?
+  sourceGame   Game?  @relation("GameCopy", fields: [sourceGameId], references: [id])
+  copies       Game[] @relation("GameCopy")
+
+  // Edit token for anonymous ownership
+  editToken String? @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  rounds    Round[]
+  finalClue FinalClue?
+  sessions  Session[]
+
+  @@index([ownerId])
+  @@index([visibility])
+  @@index([sourceType])
+  @@index([createdAt])
+}
+
+// ─── Game Structure ──────────────────────────────────────────────
+
+model Round {
+  id     String @id @default(cuid())
+  gameId String
+  game   Game   @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  number Int // 1 or 2
+
+  categories Category[]
+  createdAt  DateTime   @default(now())
+
+  @@unique([gameId, number])
+  @@index([gameId])
+}
+
+model Category {
+  id      String @id @default(cuid())
+  roundId String
+  round   Round  @relation(fields: [roundId], references: [id], onDelete: Cascade)
+
+  name  String
+  order Int // 0..5
+
+  clues Clue[]
+
+  @@unique([roundId, order])
+  @@index([roundId])
+}
+
+model Clue {
+  id         String   @id @default(cuid())
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  order Int // 1..5
+  value Int
+  question  String
+  answer    String
+
+  dailyDouble Boolean @default(false)
+
+  revealedIn RevealedClue[]
+
+  @@unique([categoryId, order])
+  @@index([categoryId])
+}
+
+model FinalClue {
+  id     String @id @default(cuid())
+  gameId String @unique
+  game   Game   @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  category String
+  question String
+  answer   String
+}
+
+// ─── Play Sessions ───────────────────────────────────────────────
+
+model Session {
+  id     String @id @default(cuid())
+  gameId String
+  game   Game   @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  state         SessionState?
+  players       SessionPlayer[]
+  revealedClues RevealedClue[]
+  actionLog     ActionLog[]
+}
+
+model SessionPlayer {
+  id        String  @id @default(cuid())
+  sessionId String
+  session   Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  name  String
+  score Int @default(0)
+  order Int // 0..N-1
+
+  @@unique([sessionId, order])
+  @@index([sessionId])
+}
+
+model SessionState {
+  id        String  @id @default(cuid())
+  sessionId String  @unique
+  session   Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  roundNumber  Int     @default(1) // 1, 2, or 3 (final)
+  activeClueId String?
+
+  // Valid values: "BOARD", "CLUE_OPEN", "DAILY_DOUBLE", "FINAL_WAGER", "FINAL_ANSWER", "COMPLETE"
+  status String @default("BOARD")
+
+  // Daily double in-progress state (JSON string)
+  // Structure: { "clueId": string, "playerOrder": number, "wager": number }
+  dailyDoubleJson String @default("{}")
+
+  // Monotonic version counter for optimistic concurrency control
+  version Int @default(0)
+
+  updatedAt DateTime @updatedAt
+}
+
+// Normalized table replacing revealedClueIdsJson
+model RevealedClue {
+  id        String  @id @default(cuid())
+  sessionId String
+  session   Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  clueId    String
+  clue      Clue    @relation(fields: [clueId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, clueId])
+  @@index([sessionId])
+}
+
+// ─── Action Log (Event Sourcing for Scores) ──────────────────────
+
+model ActionLog {
+  id        String  @id @default(cuid())
+  sessionId String
+  session   Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  // Monotonic sequence number within the session
+  sequence Int
+
+  // Valid values: "CLUE_CORRECT", "CLUE_INCORRECT", "DAILY_DOUBLE_CORRECT",
+  //              "DAILY_DOUBLE_INCORRECT", "FINAL_CORRECT", "FINAL_INCORRECT"
+  type String
+
+  playerOrder Int
+  delta       Int     // signed score change (+200, -200, +wager, -wager)
+  clueId      String? // null for final jeopardy
+
+  createdAt DateTime @default(now())
+
+  @@unique([sessionId, sequence])
+  @@index([sessionId])
+}
