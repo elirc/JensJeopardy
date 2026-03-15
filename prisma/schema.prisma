@@ -118,8 +118,6 @@ model Clue {
   question  String
   answer    String
 
-  dailyDouble Boolean @default(false)
-
   revealedIn RevealedClue[]
 
   @@unique([categoryId, order])
@@ -172,12 +170,11 @@ model SessionState {
   roundNumber  Int     @default(1) // 1, 2, or 3 (final)
   activeClueId String?
 
-  // Valid values: "BOARD", "CLUE_OPEN", "DAILY_DOUBLE", "FINAL_WAGER", "FINAL_ANSWER", "COMPLETE"
+  // Valid values: "BOARD", "CLUE_OPEN", "FINAL_WAGER", "FINAL_ANSWER", "COMPLETE"
   status String @default("BOARD")
 
-  // Daily double in-progress state (JSON string)
-  // Structure: { "clueId": string, "playerOrder": number, "wager": number }
-  dailyDoubleJson String @default("{}")
+  // Generic transient session payload (currently used for final wagers).
+  statePayloadJson String @default("{}") @map("dailyDoubleJson")
 
   // Monotonic version counter for optimistic concurrency control
   version Int @default(0)
@@ -207,8 +204,7 @@ model ActionLog {
   // Monotonic sequence number within the session
   sequence Int
 
-  // Valid values: "CLUE_CORRECT", "CLUE_INCORRECT", "DAILY_DOUBLE_CORRECT",
-  //              "DAILY_DOUBLE_INCORRECT", "FINAL_CORRECT", "FINAL_INCORRECT"
+  // Valid values: "CLUE_CORRECT", "CLUE_INCORRECT", "FINAL_CORRECT", "FINAL_INCORRECT"
   type String
 
   playerOrder Int

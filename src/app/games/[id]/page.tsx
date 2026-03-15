@@ -31,6 +31,7 @@ export default async function GamePreviewPage({ params }: Props) {
 
   // Check visibility: PRIVATE games require edit permission
   const hasEditPermission = await canEditGame(id);
+  const isJensPassoverGame = game.slug === "jens-2026-passover-jeopardy";
   if (game.visibility === "PRIVATE" && !hasEditPermission) {
     return (
       <div className="text-center py-16">
@@ -42,14 +43,26 @@ export default async function GamePreviewPage({ params }: Props) {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div
+        className={`mb-6 ${
+          isJensPassoverGame
+            ? "flex flex-col items-center gap-5 text-center"
+            : "flex items-center justify-between"
+        }`}
+      >
         <div>
           <h1 className="text-2xl font-bold text-white">{game.title}</h1>
           {game.description && (
             <p className="text-gray-400 mt-1">{game.description}</p>
           )}
         </div>
-        <div className="flex items-center gap-3">
+        <div
+          className={
+            isJensPassoverGame
+              ? "flex w-full justify-center"
+              : "flex items-center gap-3"
+          }
+        >
           {hasEditPermission && (
             <Link
               href={`/games/${game.id}/edit`}
@@ -58,17 +71,28 @@ export default async function GamePreviewPage({ params }: Props) {
               Edit
             </Link>
           )}
-          <GamePreviewActions gameId={game.id} />
+          <GamePreviewActions
+            gameId={game.id}
+            featuredPlay={isJensPassoverGame}
+          />
         </div>
       </div>
 
       {/* Read-only board preview */}
       {game.rounds.map((round) => (
         <div key={round.id} className="mb-6">
+          {(() => {
+            const columnCount = Math.max(round.categories.length, 1);
+
+            return (
+              <>
           <h3 className="text-md font-semibold text-white mb-3">
             Round {round.number}
           </h3>
-          <div className="grid grid-cols-6 gap-1 bg-black rounded-lg overflow-hidden">
+          <div
+            className="grid gap-1 bg-black rounded-lg overflow-hidden"
+            style={{ gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))` }}
+          >
             {round.categories.map((cat) => (
               <div
                 key={cat.id}
@@ -95,6 +119,9 @@ export default async function GamePreviewPage({ params }: Props) {
               })
             )}
           </div>
+              </>
+            );
+          })()}
         </div>
       ))}
 

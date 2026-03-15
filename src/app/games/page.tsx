@@ -36,7 +36,11 @@ export default async function GamesPage({ searchParams }: Props) {
     }
   } else if (activeTab === "official") {
     games = await prisma.game.findMany({
-      where: { sourceType: "OFFICIAL", visibility: "PUBLIC" },
+      where: {
+        sourceType: "OFFICIAL",
+        visibility: "PUBLIC",
+        slug: "jens-2026-passover-jeopardy",
+      },
       include: { _count: { select: { rounds: true, sessions: true } } },
       orderBy: { createdAt: "desc" },
     });

@@ -10,7 +10,6 @@ interface Category {
     id: string;
     order: number;
     value: number;
-    dailyDouble: boolean;
   }[];
 }
 
@@ -28,6 +27,7 @@ export default function Board({
   fillHeight = false,
 }: BoardProps) {
   const sortedCategories = [...categories].sort((a, b) => a.order - b.order);
+  const columnCount = Math.max(sortedCategories.length, 1);
   const rows = [1, 2, 3, 4, 5];
   const cellRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
 
@@ -44,10 +44,13 @@ export default function Board({
 
   return (
     <div
-      className={`grid grid-cols-6 gap-[2px] bg-black rounded-lg overflow-hidden ${
+      className={`grid gap-[2px] bg-black rounded-lg overflow-hidden ${
         fillHeight ? "h-full" : ""
       }`}
-      style={fillHeight ? { gridTemplateRows: "auto repeat(5, 1fr)" } : undefined}
+      style={{
+        gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))`,
+        ...(fillHeight ? { gridTemplateRows: "auto repeat(5, 1fr)" } : {}),
+      }}
     >
       {/* Category headers */}
       {sortedCategories.map((cat) => (

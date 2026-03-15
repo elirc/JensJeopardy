@@ -13,7 +13,6 @@ interface Clue {
   value: number;
   question: string;
   answer: string;
-  dailyDouble: boolean;
 }
 
 interface Category {

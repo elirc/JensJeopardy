@@ -10,7 +10,6 @@ interface Clue {
   value: number;
   question: string;
   answer: string;
-  dailyDouble: boolean;
 }
 
 interface Category {
@@ -90,6 +89,7 @@ export default function RoundGrid({
   const [editingClue, setEditingClue] = useState<Clue | null>(null);
 
   const sortedCategories = [...categories].sort((a, b) => a.order - b.order);
+  const columnCount = Math.max(sortedCategories.length, 1);
 
   const handleClueClick = useCallback((clue: Clue) => {
     setEditingClue(clue);
@@ -103,7 +103,10 @@ export default function RoundGrid({
       <h3 className="text-md font-semibold text-white mb-3">
         Round {roundNumber}
       </h3>
-      <div className="grid grid-cols-6 gap-[2px] bg-black rounded-lg overflow-hidden">
+      <div
+        className="grid gap-[2px] bg-black rounded-lg overflow-hidden"
+        style={{ gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))` }}
+      >
         {/* Category headers */}
         {sortedCategories.map((cat) => (
           <div key={cat.id} className="jeopardy-tile-header min-h-[50px]">
@@ -133,11 +136,6 @@ export default function RoundGrid({
                 title={hasContent ? "Click to edit" : "Click to add clue content"}
               >
                 ${clue.value}
-                {clue.dailyDouble && (
-                  <span className="block text-[10px] text-yellow-300 mt-0.5">
-                    DD
-                  </span>
-                )}
               </button>
             );
           })

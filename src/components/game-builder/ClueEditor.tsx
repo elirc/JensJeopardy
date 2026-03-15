@@ -10,7 +10,6 @@ interface ClueEditorProps {
     value: number;
     question: string;
     answer: string;
-    dailyDouble: boolean;
   };
   onClose: () => void;
   onSaved: () => void;
@@ -20,7 +19,6 @@ export default function ClueEditor({ clue, onClose, onSaved }: ClueEditorProps) 
   const [question, setQuestion] = useState(clue.question);
   const [answer, setAnswer] = useState(clue.answer);
   const [value, setValue] = useState(clue.value);
-  const [dailyDouble, setDailyDouble] = useState(clue.dailyDouble);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -31,7 +29,6 @@ export default function ClueEditor({ clue, onClose, onSaved }: ClueEditorProps) 
       question,
       answer,
       value,
-      dailyDouble,
     });
     setSaving(false);
     if (result.success) {
@@ -85,15 +82,6 @@ export default function ClueEditor({ clue, onClose, onSaved }: ClueEditorProps) 
               className="w-full bg-gray-700 text-white rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--jeopardy-gold)] resize-none"
             />
           </div>
-          <label className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={dailyDouble}
-              onChange={(e) => setDailyDouble(e.target.checked)}
-              className="rounded"
-            />
-            Daily Double
-          </label>
           {error && <p className="text-red-400 text-sm">{error}</p>}
           <div className="flex justify-end gap-3">
             <button

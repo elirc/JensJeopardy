@@ -24,7 +24,6 @@ export type GameSourceType = z.infer<typeof GameSourceTypeSchema>;
 export const SessionStatusSchema = z.enum([
   "BOARD",
   "CLUE_OPEN",
-  "DAILY_DOUBLE",
   "FINAL_WAGER",
   "FINAL_ANSWER",
   "COMPLETE",
@@ -34,8 +33,6 @@ export type SessionStatus = z.infer<typeof SessionStatusSchema>;
 export const ActionTypeSchema = z.enum([
   "CLUE_CORRECT",
   "CLUE_INCORRECT",
-  "DAILY_DOUBLE_CORRECT",
-  "DAILY_DOUBLE_INCORRECT",
   "FINAL_CORRECT",
   "FINAL_INCORRECT",
 ]);
@@ -55,7 +52,6 @@ export const ClueSchema = z.object({
   question: z.string().trim().min(1).max(300),
   answer: z.string().trim().min(1).max(300),
   value: z.number().int().positive(),
-  dailyDouble: z.boolean().default(false),
 });
 
 export const FinalClueSchema = z.object({
@@ -74,11 +70,6 @@ export const PlayerSchema = z.object({
 export const PlayersSchema = z.array(PlayerSchema).min(2).max(6);
 
 // ─── Wager validation ───────────────────────────────────────────
-
-export const DailyDoubleWagerSchema = z.object({
-  playerOrder: z.number().int().min(0),
-  wager: z.number().int().min(5), // min $5 per Jeopardy rules
-});
 
 export const FinalWagerSchema = z.object({
   playerOrder: z.number().int().min(0),
@@ -107,7 +98,6 @@ export const GameExportSchema = z.object({
                     value: z.number().int().positive(),
                     question: z.string(),
                     answer: z.string(),
-                    dailyDouble: z.boolean(),
                   })
                 )
                 .length(5),

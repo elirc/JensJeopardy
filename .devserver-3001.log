@@ -1,0 +1,23 @@
+
+> jeopardy-maker@0.1.0 dev
+> next dev --hostname=127.0.0.1 --port=3001
+
+▲ Next.js 16.1.6 (Turbopack)
+- Local:         http://127.0.0.1:3001
+- Network:       http://127.0.0.1:3001
+- Environments: .env
+
+✓ Starting...
+Creating turbopack project {
+  dir: 'C:\\Users\\Owner\\Desktop\\finaljepgame\\jeopardy-maker',
+  testMode: true
+}
+✓ Ready in 7.6s
+○ Compiling / ...
+ GET / 200 in 6.5s (compile: 5.1s, render: 1396ms)
+[?25h
+npm notice
+npm notice New major version of npm available! 10.9.2 -> 11.11.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.11.0
+npm notice To update run: npm install -g npm@11.11.0
+npm notice

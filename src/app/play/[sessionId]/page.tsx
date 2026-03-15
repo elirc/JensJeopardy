@@ -52,7 +52,6 @@ export default async function PlaySessionPage({ params }: Props) {
           value: cl.value,
           question: cl.question,
           answer: cl.answer,
-          dailyDouble: cl.dailyDouble,
         })),
       })),
     })),
@@ -68,7 +67,6 @@ export default async function PlaySessionPage({ params }: Props) {
           roundNumber: session.state.roundNumber,
           activeClueId: session.state.activeClueId,
           status: session.state.status,
-          dailyDoubleJson: session.state.dailyDoubleJson,
           version: session.state.version,
         }
       : null,

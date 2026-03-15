@@ -1,5 +1,6 @@
 import { PrismaClient } from "@/generated/prisma/client";
 import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
+import { PrismaLibSql } from "@prisma/adapter-libsql";
 import { existsSync } from "node:fs";
 import path from "node:path";
 
@@ -42,11 +43,23 @@ function resolveDatabaseUrl(rawUrl: string | undefined): string {
   return `file:${absolutePath.replace(/\\/g, "/")}`;
 }
 
-const databaseUrl = resolveDatabaseUrl(process.env.DATABASE_URL);
+function isLibSqlUrl(url: string): boolean {
+  return (
+    url.startsWith("libsql://") ||
+    url.startsWith("https://") ||
+    url.startsWith("wss://")
+  );
+}
 
-const adapter = new PrismaBetterSqlite3({
-  url: databaseUrl,
-});
+const databaseUrl = resolveDatabaseUrl(process.env.DATABASE_URL);
+const adapter = isLibSqlUrl(databaseUrl)
+  ? new PrismaLibSql({
+      url: databaseUrl,
+      authToken: process.env.TURSO_AUTH_TOKEN,
+    })
+  : new PrismaBetterSqlite3({
+      url: databaseUrl,
+    });
 
 export const prisma = globalForPrisma.prisma ?? new PrismaClient({ adapter });
 

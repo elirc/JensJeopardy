@@ -1,22 +1,15 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import PlayerSetup from "@/components/play/PlayerSetup";
 import Board from "@/components/play/Board";
-import Scoreboard from "@/components/play/Scoreboard";
 import ClueModal from "@/components/play/ClueModal";
-import DailyDoubleModal from "@/components/play/DailyDoubleModal";
 import FinalJeopardy from "@/components/play/FinalJeopardy";
-import UndoButton from "@/components/play/UndoButton";
 import EndScreen from "@/components/play/EndScreen";
 import {
-  setSessionPlayers,
   selectClue,
-  scoreClue,
   closeClue,
-  startDailyDouble,
-  scoreDailyDouble,
+  returnClueToBoard,
   nextRound,
   startFinal,
   setFinalWagers,
@@ -29,7 +22,6 @@ interface Clue {
   value: number;
   question: string;
   answer: string;
-  dailyDouble: boolean;
 }
 
 interface Category {
@@ -62,7 +54,6 @@ interface SessionData {
     roundNumber: number;
     activeClueId: string | null;
     status: string;
-    dailyDoubleJson: string;
     version: number;
   } | null;
   players: Player[];
@@ -77,17 +68,16 @@ export default function PlaySessionClient({
   const router = useRouter();
   const session = initialSession;
   const [clueOriginRect, setClueOriginRect] = useState<DOMRect | null>(null);
+  const [hideIntroText, setHideIntroText] = useState(false);
 
   const state = session.state!;
   const players = session.players;
   const revealedSet = new Set(session.revealedClueIds);
 
-  // Find current round
   const currentRound = session.rounds.find(
     (r) => r.number === state.roundNumber
   );
 
-  // Find active clue details
   const activeClue = state.activeClueId
     ? session.rounds
         .flatMap((r) => r.categories)
@@ -95,66 +85,25 @@ export default function PlaySessionClient({
         .find((cl) => cl.id === state.activeClueId)
     : null;
 
-  // Parse daily double state
-  let ddState: { clueId: string; playerOrder: number; wager: number } | null =
-    null;
-  try {
-    const parsed = JSON.parse(state.dailyDoubleJson);
-    if (parsed.clueId) ddState = parsed;
-  } catch {
-    // ignore
-  }
-
-  // Check if all clues in current round are revealed
   const allCluesRevealed = currentRound
     ? currentRound.categories.every((cat) =>
         cat.clues.every((clue) => revealedSet.has(clue.id))
       )
     : false;
 
+  const isJensPassoverGame =
+    session.gameTitle === "Jen's 2026 Passover Jeopardy";
   const hasRound2 = session.rounds.some((r) => r.number === 2);
   const hasFinalClue = !!session.finalClue;
 
-  // Compute highest board value for DD wager
-  const highestBoardValue = currentRound
-    ? Math.max(...currentRound.categories.flatMap((c) => c.clues.map((cl) => cl.value)))
-    : 1000;
-
-  const refreshSession = useCallback(() => {
-    router.refresh();
-  }, [router]);
-
-  // ── Player Setup Phase ──
-  if (players.length === 0) {
-    return (
-      <div className="py-8">
-        <h1 className="text-xl font-bold text-white text-center mb-8">
-          {session.gameTitle}
-        </h1>
-        <PlayerSetup
-          onStart={async (playerList) => {
-            const result = await setSessionPlayers(session.id, playerList);
-            if (result.success) {
-              router.refresh();
-            }
-          }}
-        />
-      </div>
-    );
-  }
-
-  // ── Game Complete ──
   if (state.status === "COMPLETE") {
     return (
       <EndScreen
-        players={players}
         gameId={session.gameId}
-        sessionId={session.id}
       />
     );
   }
 
-  // ── Final Jeopardy ──
   if (
     (state.status === "FINAL_WAGER" || state.status === "FINAL_ANSWER") &&
     session.finalClue
@@ -182,40 +131,47 @@ export default function PlaySessionClient({
     );
   }
 
-  // ── Board Phase (viewport-filling layout) ──
   return (
     <div className="h-screen flex flex-col overflow-hidden">
-      {/* Slim header bar */}
-      <div className="flex items-center justify-between px-4 py-2 shrink-0">
-        <h1 className="text-lg font-bold text-white truncate">
+      <div
+        className={`shrink-0 px-4 flex flex-col items-center ${
+          isJensPassoverGame && !hideIntroText
+            ? "pt-[4vh] pb-[2vh] min-h-[10vh]"
+            : "pt-4 pb-2"
+        }`}
+      >
+        <h1 className="w-full text-lg font-bold text-white truncate text-center">
           {session.gameTitle}
         </h1>
-        <div className="flex items-center gap-3">
-          <span className="text-gray-500 text-sm">
-            Round {state.roundNumber}
-          </span>
-          <UndoButton
-            sessionId={session.id}
-            disabled={
-              state.status === "DAILY_DOUBLE" ||
-              state.status === "FINAL_WAGER" ||
-              state.status === "FINAL_ANSWER"
-            }
-            onUndo={refreshSession}
-          />
-        </div>
+
+        {isJensPassoverGame && !hideIntroText && (
+          <div className="mt-3 flex w-full max-w-5xl items-start justify-center gap-3">
+            <p className="max-w-5xl text-center text-sm leading-relaxed text-gray-300 md:text-base">
+              I make a new Passover Jeopardy game every year. The questions are
+              a combination of basic Seder knowledge, connections to current
+              events, and Passover-related jokes. It is designed to be a fun
+              addition to a Seder. (You can find other versions on my website,
+              rubinjen.com.)
+            </p>
+            <button
+              onClick={() => setHideIntroText(true)}
+              className="shrink-0 rounded-lg border border-gray-500 bg-black/30 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:border-gray-300 hover:bg-black/45"
+            >
+              Hide Text
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* Scoreboard */}
-      <div className="shrink-0 px-4">
-        <Scoreboard
-          players={players}
-        />
-      </div>
-
-      {/* Board fills remaining space */}
       {currentRound && (
-        <div className="flex-1 min-h-0 px-4 py-2">
+        <div
+          className={`min-h-0 px-4 ${
+            isJensPassoverGame && !hideIntroText ? "pb-4" : "flex-1 py-2"
+          }`}
+          style={
+            isJensPassoverGame && !hideIntroText ? { height: "68vh" } : undefined
+          }
+        >
           <Board
             categories={currentRound.categories}
             revealedClueIds={revealedSet}
@@ -229,7 +185,6 @@ export default function PlaySessionClient({
         </div>
       )}
 
-      {/* Round progression */}
       {allCluesRevealed && state.status === "BOARD" && (
         <div className="flex justify-center py-3 gap-4 shrink-0">
           {state.roundNumber === 1 && hasRound2 && (
@@ -272,67 +227,20 @@ export default function PlaySessionClient({
         </div>
       )}
 
-      {/* Clue Modal (regular clue) */}
       {state.status === "CLUE_OPEN" && activeClue && (
         <ClueModal
           question={activeClue.question}
           answer={activeClue.answer}
           value={activeClue.value}
-          players={players}
           originRect={clueOriginRect}
-          onScore={async (playerOrder, correct) => {
-            const result = await scoreClue(
-              session.id,
-              activeClue.id,
-              playerOrder,
-              correct,
-              state.version
-            );
+          onBack={async () => {
+            const result = await returnClueToBoard(session.id, state.version);
             if (result.success) {
               setClueOriginRect(null);
               router.refresh();
             }
           }}
           onClose={async () => {
-            const result = await closeClue(session.id, state.version);
-            if (result.success) {
-              setClueOriginRect(null);
-              router.refresh();
-            }
-          }}
-        />
-      )}
-
-      {/* Daily Double Modal */}
-      {state.status === "DAILY_DOUBLE" && activeClue && (
-        <DailyDoubleModal
-          question={activeClue.question}
-          answer={activeClue.answer}
-          players={players}
-          highestBoardValue={highestBoardValue}
-          wagerState={ddState}
-          onSubmitWager={async (playerOrder, wager) => {
-            const result = await startDailyDouble(
-              session.id,
-              activeClue.id,
-              playerOrder,
-              wager,
-              state.version
-            );
-            if (result.success) router.refresh();
-          }}
-          onScore={async (correct) => {
-            const result = await scoreDailyDouble(
-              session.id,
-              correct,
-              state.version
-            );
-            if (result.success) {
-              setClueOriginRect(null);
-              router.refresh();
-            }
-          }}
-          onCancel={async () => {
             const result = await closeClue(session.id, state.version);
             if (result.success) {
               setClueOriginRect(null);

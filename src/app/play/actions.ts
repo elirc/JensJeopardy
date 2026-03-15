@@ -1,19 +1,12 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { PlayersSchema } from "@/lib/validators";
 
 // ─── Types ──────────────────────────────────────────────────────
 
 type ActionResult<T = void> =
   | { success: true; data: T }
   | { success: false; error: string };
-
-interface DailyDoubleState {
-  clueId: string;
-  playerOrder: number;
-  wager: number;
-}
 
 interface FinalWagerState {
   wagers: { playerOrder: number; wager: number }[];
@@ -56,45 +49,6 @@ async function getNextSequence(
     select: { sequence: true },
   });
   return (last?.sequence ?? -1) + 1;
-}
-
-/**
- * Gets the highest clue value on the current round's board for a session.
- */
-async function getHighestBoardValue(
-  sessionId: string,
-  roundNumber: number,
-  tx: Parameters<Parameters<typeof prisma.$transaction>[0]>[0] = prisma
-): Promise<number> {
-  const session = await tx.session.findUniqueOrThrow({
-    where: { id: sessionId },
-    select: { gameId: true },
-  });
-
-  const round = await tx.round.findUnique({
-    where: { gameId_number: { gameId: session.gameId, number: roundNumber } },
-    select: {
-      categories: {
-        select: {
-          clues: {
-            select: { value: true },
-            orderBy: { value: "desc" },
-            take: 1,
-          },
-        },
-      },
-    },
-  });
-
-  if (!round) return 0;
-
-  let highest = 0;
-  for (const cat of round.categories) {
-    for (const clue of cat.clues) {
-      if (clue.value > highest) highest = clue.value;
-    }
-  }
-  return highest;
 }
 
 /**
@@ -141,6 +95,13 @@ export async function createSessionFromGame(
     const session = await prisma.session.create({
       data: {
         gameId,
+        players: {
+          create: {
+            name: "Player 1",
+            order: 0,
+            score: 0,
+          },
+        },
         state: {
           create: {
             roundNumber: 1,
@@ -162,53 +123,9 @@ export async function createSessionFromGame(
   }
 }
 
-/**
- * Sets the players for a session. Validates with PlayersSchema.
- * Deletes existing players and creates new ones in a transaction.
- */
-export async function setSessionPlayers(
-  sessionId: string,
-  players: { name: string; order: number }[]
-): Promise<ActionResult> {
-  try {
-    const parsed = PlayersSchema.safeParse(players);
-    if (!parsed.success) {
-      return { success: false, error: "Invalid players data: " + parsed.error.message };
-    }
-
-    const session = await prisma.session.findUnique({
-      where: { id: sessionId },
-      select: { id: true },
-    });
-    if (!session) {
-      return { success: false, error: "Session not found." };
-    }
-
-    await prisma.$transaction(async (tx) => {
-      await tx.sessionPlayer.deleteMany({ where: { sessionId } });
-      await tx.sessionPlayer.createMany({
-        data: parsed.data.map((p) => ({
-          sessionId,
-          name: p.name,
-          order: p.order,
-          score: 0,
-        })),
-      });
-    });
-
-    return { success: true, data: undefined };
-  } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error ? error.message : "Failed to set players.",
-    };
-  }
-}
 
 /**
- * Selects a clue on the board. Sets activeClueId on state.
- * If the clue is a daily double, sets status to DAILY_DOUBLE; otherwise CLUE_OPEN.
+ * Selects a clue on the board. Sets activeClueId on state and opens clue view.
  * Uses optimistic concurrency.
  */
 export async function selectClue(
@@ -219,17 +136,15 @@ export async function selectClue(
   try {
     const clue = await prisma.clue.findUnique({
       where: { id: clueId },
-      select: { id: true, dailyDouble: true },
+      select: { id: true },
     });
     if (!clue) {
       return { success: false, error: "Clue not found." };
     }
 
-    const newStatus = clue.dailyDouble ? "DAILY_DOUBLE" : "CLUE_OPEN";
-
     await updateSessionStateOptimistic(sessionId, version, {
       activeClueId: clueId,
-      status: newStatus,
+      status: "CLUE_OPEN",
     });
 
     return { success: true, data: undefined };
@@ -370,59 +285,25 @@ export async function closeClue(
 }
 
 /**
- * Starts a daily double by validating the wager and storing DD state.
- * Wager must be min $5, max = max(playerScore, highestBoardValue).
- * Keeps status at DAILY_DOUBLE. Uses optimistic concurrency.
+ * Returns from an opened clue to the board without revealing or scoring it.
+ * Uses optimistic concurrency.
  */
-export async function startDailyDouble(
+export async function returnClueToBoard(
   sessionId: string,
-  clueId: string,
-  playerOrder: number,
-  wager: number,
   version: number
 ): Promise<ActionResult> {
   try {
-    // Get player's current score
-    const player = await prisma.sessionPlayer.findUnique({
-      where: { sessionId_order: { sessionId, order: playerOrder } },
-      select: { score: true },
-    });
-    if (!player) {
-      return { success: false, error: "Player not found." };
-    }
-
-    // Get session state for round number
     const state = await prisma.sessionState.findUnique({
       where: { sessionId },
-      select: { roundNumber: true },
+      select: { activeClueId: true },
     });
-    if (!state) {
-      return { success: false, error: "Session state not found." };
+    if (!state || !state.activeClueId) {
+      return { success: false, error: "No active clue to return." };
     }
-
-    // Calculate max wager
-    const highestValue = await getHighestBoardValue(
-      sessionId,
-      state.roundNumber
-    );
-    const maxWager = Math.max(player.score, highestValue);
-
-    // Validate wager
-    if (wager < 5) {
-      return { success: false, error: "Wager must be at least $5." };
-    }
-    if (wager > maxWager) {
-      return {
-        success: false,
-        error: `Wager cannot exceed $${maxWager}.`,
-      };
-    }
-
-    const ddState: DailyDoubleState = { clueId, playerOrder, wager };
 
     await updateSessionStateOptimistic(sessionId, version, {
-      dailyDoubleJson: JSON.stringify(ddState),
-      status: "DAILY_DOUBLE",
+      activeClueId: null,
+      status: "BOARD",
     });
 
     return { success: true, data: undefined };
@@ -432,101 +313,7 @@ export async function startDailyDouble(
       error:
         error instanceof Error
           ? error.message
-          : "Failed to start daily double.",
-    };
-  }
-}
-
-/**
- * Scores a daily double. Reads DD state from dailyDoubleJson, creates
- * ActionLog entry, updates cached score, marks clue as revealed, clears
- * DD state, and sets status to BOARD. Transaction + optimistic concurrency.
- */
-export async function scoreDailyDouble(
-  sessionId: string,
-  correct: boolean,
-  version: number
-): Promise<ActionResult> {
-  try {
-    // Read the DD state
-    const state = await prisma.sessionState.findUnique({
-      where: { sessionId },
-      select: { dailyDoubleJson: true },
-    });
-    if (!state) {
-      return { success: false, error: "Session state not found." };
-    }
-
-    let ddState: DailyDoubleState;
-    try {
-      ddState = JSON.parse(state.dailyDoubleJson) as DailyDoubleState;
-    } catch {
-      return {
-        success: false,
-        error: "Invalid daily double state.",
-      };
-    }
-
-    if (!ddState.clueId || ddState.wager === undefined) {
-      return {
-        success: false,
-        error: "Daily double has not been started.",
-      };
-    }
-
-    const delta = correct ? ddState.wager : -ddState.wager;
-    const type = correct ? "DAILY_DOUBLE_CORRECT" : "DAILY_DOUBLE_INCORRECT";
-
-    await prisma.$transaction(async (tx) => {
-      // Optimistic concurrency check + reset state
-      await updateSessionStateOptimistic(
-        sessionId,
-        version,
-        {
-          activeClueId: null,
-          dailyDoubleJson: "{}",
-          status: "BOARD",
-        },
-        tx
-      );
-
-      // Create action log entry
-      const sequence = await getNextSequence(sessionId, tx);
-      await tx.actionLog.create({
-        data: {
-          sessionId,
-          sequence,
-          type,
-          playerOrder: ddState.playerOrder,
-          delta,
-          clueId: ddState.clueId,
-        },
-      });
-
-      // Update cached player score
-      await tx.sessionPlayer.updateMany({
-        where: { sessionId, order: ddState.playerOrder },
-        data: { score: { increment: delta } },
-      });
-
-      // Mark clue as revealed
-      await tx.revealedClue.upsert({
-        where: {
-          sessionId_clueId: { sessionId, clueId: ddState.clueId },
-        },
-        create: { sessionId, clueId: ddState.clueId },
-        update: {},
-      });
-    });
-
-    return { success: true, data: undefined };
-  } catch (error) {
-    return {
-      success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : "Failed to score daily double.",
+          : "Failed to return to the board.",
     };
   }
 }
@@ -594,7 +381,7 @@ export async function startFinal(
 /**
  * Sets final jeopardy wagers for all players. Validates each wager
  * (min 0, max = player's current score; players with score <= 0 must wager 0).
- * Sets status to FINAL_ANSWER. Stores wagers in dailyDoubleJson (reused field).
+ * Sets status to FINAL_ANSWER and stores wagers in SessionState JSON payload.
  * Uses optimistic concurrency.
  */
 export async function setFinalWagers(
@@ -651,7 +438,7 @@ export async function setFinalWagers(
 
     await updateSessionStateOptimistic(sessionId, version, {
       status: "FINAL_ANSWER",
-      dailyDoubleJson: JSON.stringify(finalState),
+      statePayloadJson: JSON.stringify(finalState),
     });
 
     return { success: true, data: undefined };
@@ -667,7 +454,7 @@ export async function setFinalWagers(
 }
 
 /**
- * Applies final jeopardy results. Reads wagers from dailyDoubleJson, creates
+ * Applies final jeopardy results. Reads wagers from SessionState JSON payload, creates
  * ActionLog entries for each player (FINAL_CORRECT/FINAL_INCORRECT), updates
  * cached scores, and sets status to COMPLETE. Transaction + optimistic concurrency.
  */
@@ -680,7 +467,7 @@ export async function applyFinalResults(
     // Read wagers from state
     const state = await prisma.sessionState.findUnique({
       where: { sessionId },
-      select: { dailyDoubleJson: true },
+      select: { statePayloadJson: true },
     });
     if (!state) {
       return { success: false, error: "Session state not found." };
@@ -688,7 +475,7 @@ export async function applyFinalResults(
 
     let finalState: FinalWagerState;
     try {
-      finalState = JSON.parse(state.dailyDoubleJson) as FinalWagerState;
+      finalState = JSON.parse(state.statePayloadJson) as FinalWagerState;
     } catch {
       return {
         success: false,
@@ -715,7 +502,7 @@ export async function applyFinalResults(
         version,
         {
           status: "COMPLETE",
-          dailyDoubleJson: "{}",
+          statePayloadJson: "{}",
           activeClueId: null,
         },
         tx
@@ -895,4 +682,4 @@ export async function adjustScore(
 
 // ─── Exported helpers (for use in other server code if needed) ──
 
-export { getNextSequence, getHighestBoardValue, getPlayerScores };
+export { getNextSequence, getPlayerScores };

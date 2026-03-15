@@ -39,7 +39,6 @@ function buildRoundData(
       value: number;
       question: string;
       answer: string;
-      dailyDouble: boolean;
     }[];
   }[];
 } {
@@ -51,7 +50,6 @@ function buildRoundData(
       value: values[clueIdx],
       question: "Question placeholder",
       answer: "Answer placeholder",
-      dailyDouble: false,
     })),
   }));
   return { categories };
@@ -122,7 +120,6 @@ export async function createGame(options?: {
                     value: clue.value,
                     question: clue.question,
                     answer: clue.answer,
-                    dailyDouble: clue.dailyDouble,
                   })),
                 },
               })),
@@ -212,7 +209,6 @@ export async function updateClue(
     question?: string;
     answer?: string;
     value?: number;
-    dailyDouble?: boolean;
   }
 ): Promise<ActionResult> {
   try {
@@ -237,27 +233,6 @@ export async function updateClue(
     const gameId = clue.category.round.gameId;
     const perm = await requireEditPermission(gameId);
     if (!perm.allowed) return { success: false, error: perm.error };
-
-    // Enforce daily double limits per round
-    if (parsed.data.dailyDouble === true) {
-      const roundNumber = clue.category.round.number;
-      const maxDailyDoubles = roundNumber === 1 ? 1 : 2;
-
-      const existingDailyDoubles = await prisma.clue.count({
-        where: {
-          category: { roundId: clue.category.round.id },
-          dailyDouble: true,
-          id: { not: clueId }, // exclude the current clue
-        },
-      });
-
-      if (existingDailyDoubles >= maxDailyDoubles) {
-        return {
-          success: false,
-          error: `Round ${roundNumber} can have at most ${maxDailyDoubles} Daily Double${maxDailyDoubles > 1 ? "s" : ""}.`,
-        };
-      }
-    }
 
     await prisma.clue.update({
       where: { id: clueId },
@@ -307,7 +282,6 @@ export async function toggleRound2(
                     value: clue.value,
                     question: clue.question,
                     answer: clue.answer,
-                    dailyDouble: clue.dailyDouble,
                   })),
                 },
               })),
@@ -460,7 +434,6 @@ export async function copyGame(
               value: clue.value,
               question: clue.question,
               answer: clue.answer,
-              dailyDouble: clue.dailyDouble,
             })),
           });
         }
@@ -556,7 +529,6 @@ function buildExportData(game: {
         value: number;
         question: string;
         answer: string;
-        dailyDouble: boolean;
       }[];
     }[];
   }[];
@@ -580,7 +552,6 @@ function buildExportData(game: {
           value: clue.value,
           question: clue.question,
           answer: clue.answer,
-          dailyDouble: clue.dailyDouble,
         })),
       })),
     })),
@@ -646,7 +617,6 @@ export async function importGame(
               value: clue.value,
               question: clue.question,
               answer: clue.answer,
-              dailyDouble: clue.dailyDouble,
             })),
           });
         }

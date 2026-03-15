@@ -1,0 +1,26 @@
+
+> jeopardy-maker@0.1.0 dev
+> next dev --hostname=127.0.0.1 --port=3000
+
+▲ Next.js 16.1.6 (Turbopack)
+- Local:         http://127.0.0.1:3000
+- Network:       http://127.0.0.1:3000
+- Environments: .env
+
+✓ Starting...
+Creating turbopack project {
+  dir: 'C:\\Users\\Owner\\Desktop\\finaljepgame\\jeopardy-maker',
+  testMode: true
+}
+✓ Ready in 6.6s
+○ Compiling /games ...
+ GET /games 200 in 8.4s (compile: 4.4s, render: 4.0s)
+ GET /games 200 in 8.3s (compile: 4.7s, render: 3.6s)
+ GET /games 200 in 398ms (compile: 15ms, render: 383ms)
+ GET /games 200 in 410ms (compile: 15ms, render: 395ms)
+ GET /games 200 in 373ms (compile: 14ms, render: 360ms)
+ GET /games 200 in 179ms (compile: 8ms, render: 171ms)
+ GET /games/cmlfctdxk0036v8w2jx6ctbgw/edit 200 in 1940ms (compile: 1672ms, render: 267ms)
+ GET /play/cmlfd1xxq0048v8w2xfq4i5zj 200 in 2.1s (compile: 1696ms, render: 454ms)
+ GET / 200 in 251ms (compile: 109ms, render: 142ms)
+✓ Compiled in 822ms
