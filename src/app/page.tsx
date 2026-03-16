@@ -45,7 +45,8 @@ export default async function Home() {
             I make a new Passover Jeopardy game every year. The questions are a
             combination of basic Seder knowledge, connections to current
             events, and Passover-related jokes. It is designed to be a fun
-            addition to a Seder. (You can find other versions on my website,{" "}
+            addition to a Seder. (This is the 2026 edition. You can find
+            earlier editions on my website,{" "}
             <a
               href="https://rubinjen.com"
               target="_blank"
@@ -94,7 +95,8 @@ export default async function Home() {
           I make a new Passover Jeopardy game every year. The questions are a
           combination of basic Seder knowledge, connections to current events,
           and Passover-related jokes. It is designed to be a fun addition to a
-          Seder. (You can find other versions on my website,{" "}
+          Seder. (This is the 2026 edition. You can find earlier editions on my
+          website,{" "}
           <a
             href="https://rubinjen.com"
             target="_blank"
