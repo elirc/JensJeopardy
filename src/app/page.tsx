@@ -1,5 +1,6 @@
-import Link from "next/link";
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { createSessionFromGame } from "@/app/play/actions";
 
 export default async function Home() {
   const passoverGame = await prisma.game.findUnique({
@@ -11,58 +12,76 @@ export default async function Home() {
     ? `/games/${passoverGame.id}`
     : "/games?tab=official";
 
+  async function startPassoverGame() {
+    "use server";
+
+    if (!passoverGame) {
+      redirect("/games?tab=official");
+    }
+
+    const result = await createSessionFromGame(passoverGame.id);
+
+    if (result.success) {
+      redirect(`/play/${result.data.sessionId}`);
+    }
+
+    redirect(passoverHref);
+  }
+
   return (
-    <>
-      <div className="pointer-events-none fixed inset-0 z-0">
+    <section className="relative h-screen w-full overflow-hidden bg-[var(--background)]">
+      <div className="pointer-events-none absolute inset-0 z-0">
         <div
-          className="absolute inset-0 bg-center bg-no-repeat bg-cover opacity-35 blur-sm"
+          className="absolute inset-0 bg-center bg-no-repeat bg-contain"
           style={{ backgroundImage: "url('/home-passover-bg.png')" }}
         />
-        <div
-          className="absolute inset-0 bg-center bg-no-repeat bg-contain opacity-85"
-          style={{ backgroundImage: "url('/home-passover-bg.png')" }}
-        />
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,30,0.42),rgba(0,0,30,0.52))]" />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,20,0.32),rgba(0,0,20,0.48))]" />
       </div>
 
-      <div className="relative z-10 flex min-h-[70vh] flex-col items-center justify-center px-6 py-12 text-center">
-        <h1 className="mb-4 text-5xl font-bold text-[var(--jeopardy-gold)]">
-          Jeopardy Maker
-        </h1>
-        <p className="mb-8 max-w-md text-lg text-gray-100">
-          Create custom Jeopardy games, share them with friends, and play
-          together on a single device.
-        </p>
-        <div className="flex w-full max-w-5xl flex-col items-center gap-5">
-          <Link
-            href={passoverHref}
-            className="inline-flex max-w-full items-center justify-center rounded-2xl border-2 border-[var(--jeopardy-gold)] bg-[linear-gradient(90deg,rgba(0,0,51,0.58),rgba(6,12,233,0.52),rgba(0,0,51,0.58))] px-6 py-5 text-center text-2xl font-bold text-[var(--jeopardy-gold)] shadow-[0_0_30px_rgba(255,204,0,0.18)] backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:shadow-[0_0_40px_rgba(255,204,0,0.28)] sm:px-8"
+      <div className="absolute inset-y-0 left-0 z-10 flex w-full max-w-sm -translate-x-3 items-center justify-center px-6 text-center lg:max-w-md">
+        <p className="max-w-[18.5rem] px-4 text-base leading-7 text-slate-100">
+          I make a new Passover Jeopardy game every year. The questions are a
+          combination of basic Seder knowledge, connections to current events,
+          and Passover-related jokes. It is designed to be a fun addition to a
+          Seder. (You can find other versions on my website,{" "}
+          <a
+            href="https://rubinjen.com"
+            target="_blank"
+            rel="noreferrer"
+            className="text-[var(--jeopardy-gold)] underline underline-offset-4"
           >
-            Play Jen&apos;s 2026 Passover Jeopardy
-          </Link>
+            rubinjen.com
+          </a>
+          .)
+        </p>
+      </div>
 
-          <div className="mt-44 flex flex-wrap justify-center gap-4 sm:mt-52">
-            <Link
-              href="/games?tab=official"
-              className="translate-y-12 rounded-lg border border-[var(--jeopardy-gold)] bg-[rgba(0,0,51,0.42)] px-6 py-3 text-lg font-medium text-[var(--jeopardy-gold)] backdrop-blur-sm transition-colors hover:bg-[var(--jeopardy-gold)] hover:text-[var(--header-bg)]"
+      <div className="absolute inset-y-0 right-0 z-10 flex w-full max-w-sm translate-x-3 items-center justify-center px-6 text-center lg:max-w-md">
+        <p className="max-w-[18.5rem] px-4 text-base leading-7 text-slate-100">
+          If you use Passover Jeopardy in your Seder, email me at
+          rubinjen@gmail.com. I would love to know if you used it and your
+          experience with the game.
+        </p>
+      </div>
+
+      <div className="absolute inset-0 z-10 flex items-center justify-center px-6 text-center">
+        <div className="flex flex-col items-center gap-5 px-6 py-8 sm:px-8">
+          <h1
+            className="text-2xl font-bold text-white sm:text-3xl md:text-[2.2rem]"
+            style={{ textShadow: "0 2px 16px rgba(0,0,0,0.8)" }}
+          >
+            Passover Jeopardy
+          </h1>
+          <form action={startPassoverGame}>
+            <button
+              type="submit"
+              className="inline-flex max-w-full items-center justify-center rounded-full bg-[#d4a017] px-4 py-5 text-center text-2xl font-bold text-[#0a0a2e] shadow-[0_0_30px_rgba(255,204,0,0.18)] backdrop-blur-sm transition-all hover:brightness-110 sm:px-5"
             >
-              Play Prebuilt Games
-            </Link>
-            <Link
-              href="/games/new"
-              className="translate-y-12 rounded-lg bg-[rgba(255,204,0,0.78)] px-6 py-3 text-lg font-semibold text-[var(--header-bg)] shadow-[0_0_20px_rgba(255,204,0,0.2)] backdrop-blur-sm transition-colors hover:bg-[var(--jeopardy-gold-dark)]"
-            >
-              Create a Game
-            </Link>
-            <Link
-              href="/games"
-              className="translate-y-12 rounded-lg border border-gray-300 bg-[rgba(0,0,51,0.42)] px-6 py-3 text-lg font-medium text-gray-100 backdrop-blur-sm transition-colors hover:border-white hover:text-white"
-            >
-              Browse Games
-            </Link>
-          </div>
+              Play Jen&apos;s 2026 Passover Jeopardy
+            </button>
+          </form>
         </div>
       </div>
-    </>
+    </section>
   );
 }

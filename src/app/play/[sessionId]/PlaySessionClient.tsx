@@ -147,11 +147,9 @@ export default function PlaySessionClient({
         {isJensPassoverGame && !hideIntroText && (
           <div className="mt-3 flex w-full max-w-5xl items-start justify-center gap-3">
             <p className="max-w-5xl text-center text-sm leading-relaxed text-gray-300 md:text-base">
-              I make a new Passover Jeopardy game every year. The questions are
-              a combination of basic Seder knowledge, connections to current
-              events, and Passover-related jokes. It is designed to be a fun
-              addition to a Seder. (You can find other versions on my website,
-              rubinjen.com.)
+              These questions are a combination of basic Seder knowledge,
+              connections to current events, and Passover-related jokes. You
+              can find other versions on my website, rubinjen.com.
             </p>
             <button
               onClick={() => setHideIntroText(true)}

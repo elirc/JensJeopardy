@@ -15,6 +15,8 @@ export default function RootChrome({ user, children }: RootChromeProps) {
   const pathname = usePathname();
   const router = useRouter();
   const isPlayRoute = pathname.startsWith("/play/");
+  const isHomeRoute = pathname === "/";
+  const isGamePreviewRoute = /^\/games\/[^/]+$/.test(pathname);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
   const [homeEnabled, setHomeEnabled] = useState(false);
 
@@ -74,7 +76,18 @@ export default function RootChrome({ user, children }: RootChromeProps) {
         </>
       )}
 
-      {!isPlayRoute && (
+      {isGamePreviewRoute && (
+        <div className="fixed left-2 top-2 z-40 md:left-3 md:top-3">
+          <Link
+            href="/"
+            className="text-[var(--jeopardy-gold)] font-bold text-lg tracking-wide md:text-xl"
+          >
+            Home
+          </Link>
+        </div>
+      )}
+
+      {!isPlayRoute && !isHomeRoute && !isGamePreviewRoute && (
         <nav className="bg-[var(--header-bg)] border-b border-gray-700">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-14">
@@ -105,7 +118,7 @@ export default function RootChrome({ user, children }: RootChromeProps) {
       )}
       <main
         className={
-          isPlayRoute
+          isPlayRoute || isHomeRoute
             ? "w-full"
             : "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
         }
