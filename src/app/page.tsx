@@ -38,25 +38,27 @@ export default async function Home() {
         <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,20,0.32),rgba(0,0,20,0.48))]" />
       </div>
 
-      <div className="relative z-10 flex min-h-[100dvh] flex-col justify-between px-5 pb-8 pt-[calc(env(safe-area-inset-top)+1.25rem)] text-center lg:hidden">
-        <div className="mx-auto max-w-[17rem] text-sm leading-6 text-slate-100">
-          I make a new Passover Jeopardy game every year. The questions are a
-          combination of basic Seder knowledge, connections to current events,
-          and Passover-related jokes. It is designed to be a fun addition to a
-          Seder. (You can find other versions on my website,{" "}
-          <a
-            href="https://rubinjen.com"
-            target="_blank"
-            rel="noreferrer"
-            className="text-[var(--jeopardy-gold)] underline underline-offset-4"
-          >
-            rubinjen.com
-          </a>
-          .)
-        </div>
+      <div className="relative z-10 flex min-h-[100dvh] flex-col text-center lg:hidden">
+        <section className="shrink-0 bg-[rgba(10,10,46,0.94)] px-6 pb-8 pt-[calc(env(safe-area-inset-top)+1.5rem)]">
+          <div className="mx-auto w-full max-w-[18.75rem] text-center text-sm leading-6 text-slate-100 sm:max-w-[21rem]">
+            I make a new Passover Jeopardy game every year. The questions are a
+            combination of basic Seder knowledge, connections to current
+            events, and Passover-related jokes. It is designed to be a fun
+            addition to a Seder. (You can find other versions on my website,{" "}
+            <a
+              href="https://rubinjen.com"
+              target="_blank"
+              rel="noreferrer"
+              className="text-[var(--jeopardy-gold)] underline underline-offset-4"
+            >
+              rubinjen.com
+            </a>
+            .)
+          </div>
+        </section>
 
-        <div className="flex flex-1 items-center justify-center py-8">
-          <div className="flex max-w-xs flex-col items-center gap-4">
+        <section className="flex flex-1 items-center justify-center px-6 py-10">
+          <div className="flex w-full max-w-xs flex-col items-center gap-4 sm:max-w-sm">
             <h1
               className="text-3xl font-bold text-white sm:text-4xl"
               style={{ textShadow: "0 2px 16px rgba(0,0,0,0.8)" }}
@@ -72,13 +74,15 @@ export default async function Home() {
               </button>
             </form>
           </div>
-        </div>
+        </section>
 
-        <div className="mx-auto max-w-[17rem] text-sm leading-6 text-slate-100">
-          If you use Passover Jeopardy in your Seder, email me at
-          rubinjen@gmail.com. I would love to know if you used it and your
-          experience with the game.
-        </div>
+        <section className="shrink-0 bg-[rgba(10,10,46,0.94)] px-6 py-8 pb-[calc(env(safe-area-inset-bottom)+2rem)]">
+          <div className="mx-auto w-full max-w-[18.75rem] text-center text-sm leading-6 text-slate-100 sm:max-w-[21rem]">
+            If you use Passover Jeopardy in your Seder, email me at
+            rubinjen@gmail.com. I would love to know if you used it and your
+            experience with the game.
+          </div>
+        </section>
       </div>
 
       <div className="absolute inset-y-0 left-0 z-10 hidden w-full max-w-sm -translate-x-3 items-center justify-center px-6 text-center lg:flex lg:max-w-md">
