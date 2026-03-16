@@ -72,7 +72,7 @@ export default async function Home() {
                 type="submit"
                 className="inline-flex w-full items-center justify-center rounded-full bg-[#d4a017] px-5 py-4 text-center text-lg font-bold text-[#0a0a2e] shadow-[0_0_30px_rgba(255,204,0,0.18)] transition-all hover:brightness-110"
               >
-                Play Jen&apos;s 2026 Passover Jeopardy
+                Click to Play Jen&apos;s 2026 Passover Jeopardy
               </button>
             </form>
           </div>
@@ -128,7 +128,7 @@ export default async function Home() {
               type="submit"
               className="inline-flex max-w-full items-center justify-center rounded-full bg-[#d4a017] px-4 py-5 text-center text-2xl font-bold text-[#0a0a2e] shadow-[0_0_30px_rgba(255,204,0,0.18)] backdrop-blur-sm transition-all hover:brightness-110 sm:px-5"
             >
-              Play Jen&apos;s 2026 Passover Jeopardy
+              Click to Play Jen&apos;s 2026 Passover Jeopardy
             </button>
           </form>
         </div>

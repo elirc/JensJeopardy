@@ -44,18 +44,17 @@ export default function Board({
 
   return (
     <div
-      className={`grid w-full gap-[2px] rounded-lg bg-black overflow-hidden ${
+      className={`board-grid-mobile grid w-full gap-[2px] rounded-lg bg-black overflow-hidden ${
         fillHeight ? "h-full" : ""
       }`}
       style={{
         gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))`,
-        ...(fillHeight ? { gridTemplateRows: "auto repeat(5, 1fr)" } : {}),
       }}
     >
       {sortedCategories.map((cat) => (
         <div
           key={cat.id}
-          className="jeopardy-tile-header flex min-h-[68px] items-center justify-center p-2 sm:min-h-[60px] sm:p-3"
+          className="jeopardy-tile-header board-grid-header flex items-center justify-center p-2 sm:p-3"
         >
           <span className="text-center text-[9px] font-bold uppercase leading-tight tracking-wide text-white sm:text-sm">
             {cat.name}
@@ -70,7 +69,7 @@ export default function Board({
             return (
               <div
                 key={`${cat.id}-${order}`}
-                className="jeopardy-tile-revealed min-h-[78px] sm:min-h-0"
+                className="jeopardy-tile-revealed board-grid-cell"
               />
             );
           }
@@ -81,7 +80,7 @@ export default function Board({
             return (
               <div
                 key={clue.id}
-                className="jeopardy-tile-revealed min-h-[78px] sm:min-h-0"
+                className="jeopardy-tile-revealed board-grid-cell"
               />
             );
           }
@@ -93,7 +92,7 @@ export default function Board({
                 if (el) cellRefs.current.set(clue.id, el);
               }}
               onClick={() => handleCellClick(clue.id)}
-              className="jeopardy-tile relative flex min-h-[78px] items-center justify-center cursor-pointer sm:min-h-0"
+              className="jeopardy-tile board-grid-cell relative flex items-center justify-center cursor-pointer"
             >
               <span className="gold-glow px-0.5 text-base font-bold sm:px-1 sm:text-2xl md:text-3xl">
                 ${clue.value}

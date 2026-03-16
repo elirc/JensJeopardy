@@ -156,3 +156,26 @@ a {
               border-width 0.35s ease;
   will-change: transform;
 }
+
+.board-grid-mobile {
+  grid-template-rows: minmax(5.5rem, 1.15fr) repeat(5, minmax(6.25rem, 1fr));
+}
+
+.board-grid-header {
+  min-height: 5.5rem;
+}
+
+.board-grid-cell {
+  min-height: 6.25rem;
+}
+
+@media (min-width: 640px) {
+  .board-grid-mobile {
+    grid-template-rows: auto repeat(5, 1fr);
+  }
+
+  .board-grid-header,
+  .board-grid-cell {
+    min-height: 0;
+  }
+}

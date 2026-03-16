@@ -133,7 +133,7 @@ export default function PlaySessionClient({
   }
 
   return (
-    <div className="flex h-[100dvh] min-h-[100dvh] flex-col overflow-hidden">
+    <div className="flex h-full min-h-full flex-col overflow-hidden">
       <div
         className={`shrink-0 px-4 flex flex-col items-center ${
           isJensPassoverGame && !hideIntroText
@@ -188,7 +188,7 @@ export default function PlaySessionClient({
             isJensPassoverGame && !hideIntroText ? "pb-2" : "py-1 sm:py-2"
           }`}
         >
-          <div className="flex-1 min-h-0">
+          <div className="h-full min-h-0 flex-1">
             <Board
               categories={currentRound.categories}
               revealedClueIds={revealedSet}

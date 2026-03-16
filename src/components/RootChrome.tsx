@@ -142,8 +142,10 @@ export default function RootChrome({ user, children }: RootChromeProps) {
       )}
       <main
         className={
-          isPlayRoute || isHomeRoute
-            ? "w-full"
+          isPlayRoute
+            ? "h-[100dvh] w-full overflow-hidden"
+            : isHomeRoute
+              ? "w-full"
             : "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
         }
       >
