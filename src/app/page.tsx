@@ -97,7 +97,7 @@ export default async function Home() {
                   Passover Jeopardy.{" "}
                 </span>
                 <a
-                  href="https://venmo.com/Eli-Rubin-calvert"
+                  href="https://account.venmo.com/u/Eli-Rubin-calvert"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="underline underline-offset-4"
@@ -148,7 +148,7 @@ export default async function Home() {
               Jeopardy.{" "}
             </span>
             <a
-              href="https://venmo.com/Eli-Rubin-calvert"
+              href="https://account.venmo.com/u/Eli-Rubin-calvert"
               target="_blank"
               rel="noopener noreferrer"
               className="underline underline-offset-4"
