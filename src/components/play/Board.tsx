@@ -55,7 +55,7 @@ export default function Board({
       {sortedCategories.map((cat) => (
         <div
           key={cat.id}
-          className="jeopardy-tile-header flex min-h-[44px] items-center justify-center p-1.5 sm:min-h-[60px] sm:p-3"
+          className="jeopardy-tile-header flex min-h-[68px] items-center justify-center p-2 sm:min-h-[60px] sm:p-3"
         >
           <span className="text-center text-[9px] font-bold uppercase leading-tight tracking-wide text-white sm:text-sm">
             {cat.name}
@@ -70,7 +70,7 @@ export default function Board({
             return (
               <div
                 key={`${cat.id}-${order}`}
-                className="jeopardy-tile-revealed"
+                className="jeopardy-tile-revealed min-h-[78px] sm:min-h-0"
               />
             );
           }
@@ -78,7 +78,12 @@ export default function Board({
           const revealed = revealedClueIds.has(clue.id);
 
           if (revealed) {
-            return <div key={clue.id} className="jeopardy-tile-revealed" />;
+            return (
+              <div
+                key={clue.id}
+                className="jeopardy-tile-revealed min-h-[78px] sm:min-h-0"
+              />
+            );
           }
 
           return (
@@ -88,7 +93,7 @@ export default function Board({
                 if (el) cellRefs.current.set(clue.id, el);
               }}
               onClick={() => handleCellClick(clue.id)}
-              className="jeopardy-tile relative flex items-center justify-center cursor-pointer"
+              className="jeopardy-tile relative flex min-h-[78px] items-center justify-center cursor-pointer sm:min-h-0"
             >
               <span className="gold-glow px-0.5 text-base font-bold sm:px-1 sm:text-2xl md:text-3xl">
                 ${clue.value}

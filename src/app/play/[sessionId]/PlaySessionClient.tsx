@@ -133,7 +133,7 @@ export default function PlaySessionClient({
   }
 
   return (
-    <div className="flex min-h-[100dvh] flex-col overflow-hidden">
+    <div className="flex h-[100dvh] min-h-[100dvh] flex-col overflow-hidden">
       <div
         className={`shrink-0 px-4 flex flex-col items-center ${
           isJensPassoverGame && !hideIntroText
@@ -184,20 +184,26 @@ export default function PlaySessionClient({
 
       {currentRound && (
         <div
-          className={`min-h-0 flex-1 px-2 sm:px-4 ${
-            isJensPassoverGame && !hideIntroText ? "pb-3" : "py-1 sm:py-2"
+          className={`flex min-h-0 flex-1 px-2 sm:px-4 ${
+            isJensPassoverGame && !hideIntroText ? "pb-2" : "py-1 sm:py-2"
           }`}
         >
-          <Board
-            categories={currentRound.categories}
-            revealedClueIds={revealedSet}
-            fillHeight
-            onSelectClue={async (clueId, rect) => {
-              setClueOriginRect(rect);
-              const result = await selectClue(session.id, clueId, state.version);
-              if (result.success) router.refresh();
-            }}
-          />
+          <div className="flex-1 min-h-0">
+            <Board
+              categories={currentRound.categories}
+              revealedClueIds={revealedSet}
+              fillHeight
+              onSelectClue={async (clueId, rect) => {
+                setClueOriginRect(rect);
+                const result = await selectClue(
+                  session.id,
+                  clueId,
+                  state.version
+                );
+                if (result.success) router.refresh();
+              }}
+            />
+          </div>
         </div>
       )}
 
