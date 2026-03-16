@@ -2,13 +2,6 @@
 
 import { useState, useEffect, useRef } from "react";
 
-interface Player {
-  id: string;
-  name: string;
-  score: number;
-  order: number;
-}
-
 interface ClueModalProps {
   question: string;
   answer: string;
@@ -82,54 +75,58 @@ export default function ClueModal({
 
       <div
         ref={modalRef}
-        className="fixed inset-0 z-50 bg-[var(--board-bg)] flex flex-col items-center justify-center clue-modal-expanding"
+        className="fixed inset-0 z-50 overflow-y-auto bg-[var(--board-bg)] clue-modal-expanding"
         style={expanded ? expandedStyle : initialStyle}
       >
-        <div
-          className={`text-center max-w-2xl w-full px-8 transition-opacity duration-300 ${
-            expanded ? "opacity-100" : "opacity-0"
-          }`}
-        >
-          <div className="gold-glow text-sm font-semibold mb-4">${value}</div>
-          <p className="text-white text-2xl md:text-3xl font-light leading-relaxed mb-8 uppercase">
-            {question}
-          </p>
-
-          {!showAnswer && (
-            <div className="mb-8 flex flex-wrap justify-center gap-3 animate-fade-in">
-              <button
-                onClick={onBack}
-                className="bg-white/10 text-white px-6 py-3 rounded-lg text-lg hover:bg-white/20 transition-colors"
-              >
-                Back to Board
-              </button>
-              <button
-                onClick={() => setShowAnswer(true)}
-                className="bg-white/10 text-white px-6 py-3 rounded-lg text-lg hover:bg-white/20 transition-colors"
-              >
-                Reveal Answer
-              </button>
+        <div className="flex min-h-[100dvh] items-center justify-center px-4 py-[calc(env(safe-area-inset-top)+1rem)] pb-[calc(env(safe-area-inset-bottom)+1rem)] sm:px-6">
+          <div
+            className={`w-full max-w-3xl text-center transition-opacity duration-300 ${
+              expanded ? "opacity-100" : "opacity-0"
+            }`}
+          >
+            <div className="gold-glow mb-3 text-xs font-semibold sm:mb-4 sm:text-sm">
+              ${value}
             </div>
-          )}
+            <p className="mb-6 text-xl font-light leading-relaxed text-white uppercase sm:mb-8 sm:text-2xl md:text-3xl">
+              {question}
+            </p>
 
-          {showAnswer && (
-            <div className="animate-fade-in-up">
-              <div className="bg-white/10 rounded-lg p-6 mb-8">
-                <p className="gold-glow-strong text-xl font-semibold">
-                  {answer}
-                </p>
-              </div>
-
-              <div className="mb-4">
+            {!showAnswer && (
+              <div className="animate-fade-in mb-6 flex flex-col justify-center gap-3 sm:mb-8 sm:flex-row">
                 <button
-                  onClick={onClose}
-                  className="bg-white/10 text-white px-6 py-3 rounded-lg hover:bg-white/20 transition-colors"
+                  onClick={onBack}
+                  className="w-full rounded-lg bg-white/10 px-5 py-3 text-base text-white transition-colors hover:bg-white/20 sm:w-auto sm:px-6 sm:text-lg"
                 >
                   Back to Board
                 </button>
+                <button
+                  onClick={() => setShowAnswer(true)}
+                  className="w-full rounded-lg bg-white/10 px-5 py-3 text-base text-white transition-colors hover:bg-white/20 sm:w-auto sm:px-6 sm:text-lg"
+                >
+                  Reveal Answer
+                </button>
               </div>
-            </div>
-          )}
+            )}
+
+            {showAnswer && (
+              <div className="animate-fade-in-up">
+                <div className="mb-6 rounded-lg bg-white/10 p-4 sm:mb-8 sm:p-6">
+                  <p className="gold-glow-strong text-lg font-semibold sm:text-xl">
+                    {answer}
+                  </p>
+                </div>
+
+                <div className="mb-4">
+                  <button
+                    onClick={onClose}
+                    className="w-full rounded-lg bg-white/10 px-5 py-3 text-base text-white transition-colors hover:bg-white/20 sm:w-auto sm:px-6"
+                  >
+                    Back to Board
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </>

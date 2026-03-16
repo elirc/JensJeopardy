@@ -132,20 +132,20 @@ export default function PlaySessionClient({
   }
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden">
+    <div className="flex min-h-[100dvh] flex-col overflow-hidden">
       <div
         className={`shrink-0 px-4 flex flex-col items-center ${
           isJensPassoverGame && !hideIntroText
-            ? "pt-[4vh] pb-[2vh] min-h-[10vh]"
+            ? "pb-3 pt-[calc(env(safe-area-inset-top)+0.75rem)] sm:pt-[4vh]"
             : "pt-4 pb-2"
         }`}
       >
-        <h1 className="w-full text-lg font-bold text-white truncate text-center">
+        <h1 className="w-full text-center text-base font-bold text-white sm:text-lg">
           {session.gameTitle}
         </h1>
 
         {isJensPassoverGame && !hideIntroText && (
-          <div className="mt-3 flex w-full max-w-5xl items-start justify-center gap-3">
+          <div className="mt-3 flex w-full max-w-5xl flex-col items-center justify-center gap-3 sm:flex-row sm:items-start">
             <p className="max-w-5xl text-center text-sm leading-relaxed text-gray-300 md:text-base">
               These questions are a combination of basic Seder knowledge,
               connections to current events, and Passover-related jokes. You
@@ -163,12 +163,9 @@ export default function PlaySessionClient({
 
       {currentRound && (
         <div
-          className={`min-h-0 px-4 ${
-            isJensPassoverGame && !hideIntroText ? "pb-4" : "flex-1 py-2"
+          className={`min-h-0 flex-1 px-2 sm:px-4 ${
+            isJensPassoverGame && !hideIntroText ? "pb-4" : "py-2"
           }`}
-          style={
-            isJensPassoverGame && !hideIntroText ? { height: "68vh" } : undefined
-          }
         >
           <Board
             categories={currentRound.categories}
@@ -184,7 +181,7 @@ export default function PlaySessionClient({
       )}
 
       {allCluesRevealed && state.status === "BOARD" && (
-        <div className="flex justify-center py-3 gap-4 shrink-0">
+        <div className="flex shrink-0 flex-wrap justify-center gap-3 px-4 py-3">
           {state.roundNumber === 1 && hasRound2 && (
             <button
               onClick={async () => {
