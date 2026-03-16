@@ -82,15 +82,37 @@ export default async function Home() {
         <section className="shrink-0 bg-[rgba(10,10,46,0.94)] px-8 py-8 pb-[calc(env(safe-area-inset-bottom)+2rem)]">
           <div className="mx-auto flex w-full justify-center">
             <div className="w-full max-w-[16.5rem] px-1 text-center text-sm leading-6 text-slate-100 text-pretty sm:max-w-[18rem]">
-            If you use Passover Jeopardy in your Seder, email me at
-            rubinjen@gmail.com. I would love to know if you used it and your
-            experience with the game.
+              <p>
+                If you use Passover Jeopardy in your Seder, email me at
+                rubinjen@gmail.com. I would love to know if you used it and your
+                experience with the game.
+              </p>
+              <p className="relative top-4 mt-8">
+                My son, like thousands of other recently minted programmers, is
+                out here hustling in the face of AI taking all the permanent
+                entry-level jobs.{" "}
+                <span className="text-white">
+                  I would be remiss as a Jewish mother if I didn&apos;t give you a
+                  nudge to tip Eli if you use his programmed version of
+                  Passover Jeopardy.{" "}
+                </span>
+                <a
+                  href="https://venmo.com/@Eli-Rubin-calvert"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline underline-offset-4"
+                  style={{ color: "#ef4444" }}
+                >
+                  Tip jar here
+                </a>
+                .
+              </p>
             </div>
           </div>
         </section>
       </div>
 
-      <div className="absolute inset-y-0 left-0 z-10 hidden w-full max-w-sm -translate-x-3 items-center justify-center px-6 text-center lg:flex lg:max-w-md">
+      <div className="absolute inset-y-0 left-0 z-20 hidden w-full max-w-sm -translate-x-3 items-center justify-center px-6 text-center lg:flex lg:max-w-md">
         <p className="max-w-[18.5rem] px-4 text-base leading-7 text-slate-100">
           I make a new Passover Jeopardy game every year. The questions are a
           combination of basic Seder knowledge, connections to current events,
@@ -109,15 +131,37 @@ export default async function Home() {
         </p>
       </div>
 
-      <div className="absolute inset-y-0 right-0 z-10 hidden w-full max-w-sm translate-x-3 items-center justify-center px-6 text-center lg:flex lg:max-w-md">
-        <p className="max-w-[18.5rem] px-4 text-base leading-7 text-slate-100">
-          If you use Passover Jeopardy in your Seder, email me at
-          rubinjen@gmail.com. I would love to know if you used it and your
-          experience with the game.
-        </p>
+      <div className="absolute inset-y-0 right-0 z-20 hidden w-full max-w-sm translate-x-3 items-center justify-center px-6 text-center lg:flex lg:max-w-md">
+        <div className="max-w-[18.5rem] px-4 text-base leading-7 text-slate-100">
+          <p>
+            If you use Passover Jeopardy in your Seder, email me at
+            rubinjen@gmail.com. I would love to know if you used it and your
+            experience with the game.
+          </p>
+          <p className="relative top-5 mt-8">
+            My son, like thousands of other recently minted programmers, is out
+            here hustling in the face of AI taking all the permanent
+            entry-level jobs.{" "}
+            <span className="text-white">
+              I would be remiss as a Jewish mother if I didn&apos;t give you a
+              nudge to tip Eli if you use his programmed version of Passover
+              Jeopardy.{" "}
+            </span>
+            <a
+              href="https://venmo.com/@Eli-Rubin-calvert"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline underline-offset-4"
+              style={{ color: "#ef4444" }}
+            >
+              Tip jar here
+            </a>
+            .
+          </p>
+        </div>
       </div>
 
-      <div className="absolute inset-0 z-10 hidden items-center justify-center px-6 text-center lg:flex">
+      <div className="pointer-events-none absolute inset-0 z-10 hidden items-center justify-center px-6 text-center lg:flex">
         <div className="flex flex-col items-center gap-5 px-6 py-8 sm:px-8">
           <h1
             className="text-2xl font-bold text-white sm:text-3xl md:text-[2.2rem]"
@@ -125,7 +169,7 @@ export default async function Home() {
           >
             Passover Jeopardy
           </h1>
-          <form action={startPassoverGame}>
+          <form action={startPassoverGame} className="pointer-events-auto">
             <button
               type="submit"
               className="inline-flex max-w-full items-center justify-center rounded-full bg-[#d4a017] px-4 py-5 text-center text-2xl font-bold text-[#0a0a2e] shadow-[0_0_30px_rgba(255,204,0,0.18)] backdrop-blur-sm transition-all hover:brightness-110 sm:px-5"
