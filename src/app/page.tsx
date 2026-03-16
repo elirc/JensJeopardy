@@ -39,8 +39,9 @@ export default async function Home() {
       </div>
 
       <div className="relative z-10 flex min-h-[100dvh] flex-col text-center lg:hidden">
-        <section className="shrink-0 bg-[rgba(10,10,46,0.94)] px-6 pb-8 pt-[calc(env(safe-area-inset-top)+1.5rem)]">
-          <div className="mx-auto w-full max-w-[18.75rem] text-center text-sm leading-6 text-slate-100 sm:max-w-[21rem]">
+        <section className="shrink-0 bg-[rgba(10,10,46,0.94)] px-8 pb-8 pt-[calc(env(safe-area-inset-top)+1.5rem)]">
+          <div className="mx-auto flex w-full justify-center">
+            <div className="w-full max-w-[16.5rem] px-1 text-center text-sm leading-6 text-slate-100 text-pretty sm:max-w-[18rem]">
             I make a new Passover Jeopardy game every year. The questions are a
             combination of basic Seder knowledge, connections to current
             events, and Passover-related jokes. It is designed to be a fun
@@ -54,6 +55,7 @@ export default async function Home() {
               rubinjen.com
             </a>
             .)
+            </div>
           </div>
         </section>
 
@@ -76,11 +78,13 @@ export default async function Home() {
           </div>
         </section>
 
-        <section className="shrink-0 bg-[rgba(10,10,46,0.94)] px-6 py-8 pb-[calc(env(safe-area-inset-bottom)+2rem)]">
-          <div className="mx-auto w-full max-w-[18.75rem] text-center text-sm leading-6 text-slate-100 sm:max-w-[21rem]">
+        <section className="shrink-0 bg-[rgba(10,10,46,0.94)] px-8 py-8 pb-[calc(env(safe-area-inset-bottom)+2rem)]">
+          <div className="mx-auto flex w-full justify-center">
+            <div className="w-full max-w-[16.5rem] px-1 text-center text-sm leading-6 text-slate-100 text-pretty sm:max-w-[18rem]">
             If you use Passover Jeopardy in your Seder, email me at
             rubinjen@gmail.com. I would love to know if you used it and your
             experience with the game.
+            </div>
           </div>
         </section>
       </div>

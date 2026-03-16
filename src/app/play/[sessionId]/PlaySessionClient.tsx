@@ -69,6 +69,7 @@ export default function PlaySessionClient({
   const session = initialSession;
   const [clueOriginRect, setClueOriginRect] = useState<DOMRect | null>(null);
   const [hideIntroText, setHideIntroText] = useState(false);
+  const [showMobileIntro, setShowMobileIntro] = useState(false);
 
   const state = session.state!;
   const players = session.players;
@@ -136,35 +137,55 @@ export default function PlaySessionClient({
       <div
         className={`shrink-0 px-4 flex flex-col items-center ${
           isJensPassoverGame && !hideIntroText
-            ? "pb-3 pt-[calc(env(safe-area-inset-top)+0.75rem)] sm:pt-[4vh]"
-            : "pt-4 pb-2"
+            ? "pb-2 pt-[calc(env(safe-area-inset-top)+0.5rem)] sm:pt-[4vh] sm:pb-3"
+            : "pb-2 pt-[calc(env(safe-area-inset-top)+0.5rem)] sm:pt-4"
         }`}
       >
         <h1 className="w-full text-center text-base font-bold text-white sm:text-lg">
           {session.gameTitle}
         </h1>
 
-        {isJensPassoverGame && !hideIntroText && (
-          <div className="mt-3 flex w-full max-w-5xl flex-col items-center justify-center gap-3 sm:flex-row sm:items-start">
-            <p className="max-w-5xl text-center text-sm leading-relaxed text-gray-300 md:text-base">
-              These questions are a combination of basic Seder knowledge,
-              connections to current events, and Passover-related jokes. You
-              can find other versions on my website, rubinjen.com.
-            </p>
-            <button
-              onClick={() => setHideIntroText(true)}
-              className="shrink-0 rounded-lg border border-gray-500 bg-black/30 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:border-gray-300 hover:bg-black/45"
-            >
-              Hide Text
-            </button>
-          </div>
+        {isJensPassoverGame && (
+          <>
+            {!hideIntroText && (
+              <div className="mt-2 hidden w-full max-w-5xl items-start justify-center gap-3 sm:flex">
+                <p className="max-w-5xl text-center text-sm leading-relaxed text-gray-300 md:text-base">
+                  These questions are a combination of basic Seder knowledge,
+                  connections to current events, and Passover-related jokes. You
+                  can find other versions on my website, rubinjen.com.
+                </p>
+                <button
+                  onClick={() => setHideIntroText(true)}
+                  className="shrink-0 rounded-lg border border-gray-500 bg-black/30 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:border-gray-300 hover:bg-black/45"
+                >
+                  Hide Text
+                </button>
+              </div>
+            )}
+
+            <div className="mt-2 flex flex-col items-center gap-2 sm:hidden">
+              <button
+                onClick={() => setShowMobileIntro((prev) => !prev)}
+                className="rounded-lg border border-gray-500 bg-black/30 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:border-gray-300 hover:bg-black/45"
+              >
+                {showMobileIntro ? "Hide Game Info" : "Show Game Info"}
+              </button>
+              {showMobileIntro && (
+                <p className="max-w-sm text-center text-xs leading-relaxed text-gray-300">
+                  These questions are a combination of basic Seder knowledge,
+                  connections to current events, and Passover-related jokes. You
+                  can find other versions on my website, rubinjen.com.
+                </p>
+              )}
+            </div>
+          </>
         )}
       </div>
 
       {currentRound && (
         <div
           className={`min-h-0 flex-1 px-2 sm:px-4 ${
-            isJensPassoverGame && !hideIntroText ? "pb-4" : "py-2"
+            isJensPassoverGame && !hideIntroText ? "pb-3" : "py-1 sm:py-2"
           }`}
         >
           <Board
